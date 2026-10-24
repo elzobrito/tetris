@@ -7,6 +7,7 @@ Mapeamento dos nomes usados em wikilinks para caminhos relativos à raiz do proj
 | `README` | `README.md` | DOCUMENTACAO | wikilinks |
 | `tetris.py` | `tetris.py` | CODIGO | existente |
 | `tetris_trilha_original.wav` | `tetris_trilha_original.wav` | AUDIO | existente |
+| `tetris.png` | `docs/images/tetris.png` | IMAGEM | fornecida pelo usuario |
 | `referencias` | `.motor-IA/links/referencias.md` | INDICE | wikilinks |
 
 ## Referências

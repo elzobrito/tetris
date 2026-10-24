@@ -2,6 +2,8 @@
 
 Jogo de Tetris em Python com Pygame, desenvolvido como protótipo didático para aulas de Interação Humano-Computador (IHC) e Experiência do Usuário (UX). Inclui interface colorida, controles por teclado e mouse, efeitos sonoros e trilha chiptune sintetizados pelo próprio programa.
 
+![Tetris em execução, com tabuleiro, HOLD, próxima peça e painel de pontuação](docs/images/tetris.png)
+
 ## Requisitos
 
 - Python 3.10 ou superior.
