@@ -10,8 +10,8 @@ A música e os efeitos são sintetizados no próprio código, sem arquivos exter
 Os botões e a área HOLD também respondem ao mouse.
 
 A lógica do jogo foi mantida separada da apresentação visual.
-Tabuleiro didático ampliado: 14 colunas × 20 linhas, células de 30 px.
-Laterais mantêm o alinhamento da versão colorida anterior.
+Tabuleiro didático ampliado: 14 colunas × 20 linhas, células de 40 px.
+Laterais compactas deixam mais espaço para o tabuleiro.
 """
 
 from __future__ import annotations
@@ -27,15 +27,15 @@ import pygame
 # -----------------------------------------------------------------------------
 # CONFIGURAÇÃO DA TELA E TEMA COLORIDO
 # -----------------------------------------------------------------------------
-LARGURA, ALTURA = 1240, 780
+LARGURA, ALTURA = 1120, 940
 FPS = 60
 COLUNAS, LINHAS = 14, 20
-CELULA = 30
-CAMPO_X, CAMPO_Y = 410, 74
+CELULA = 40
+CAMPO_X, CAMPO_Y = 280, 74
 CAMPO_LARGURA = COLUNAS * CELULA
 CAMPO_ALTURA = LINHAS * CELULA
-ESQUERDA_X, ESQUERDA_LARGURA = 34, 330
-DIREITA_X, DIREITA_LARGURA = 876, 330
+ESQUERDA_X, ESQUERDA_LARGURA = 24, 232
+DIREITA_X, DIREITA_LARGURA = 864, 232
 
 # A paleta fica concentrada aqui para facilitar experimentos de UX.
 FUNDO = (11, 18, 31)
@@ -650,7 +650,7 @@ class Interface:
         self.titulo = pygame.font.SysFont("dejavusans", 28, bold=True)
         self.subtitulo = pygame.font.SysFont("dejavusans", 19, bold=True)
         self.valor = pygame.font.SysFont("dejavusans", 39, bold=True)
-        self.normal = pygame.font.SysFont("dejavusans", 17)
+        self.normal = pygame.font.SysFont("dejavusans", 15)
         self.pequena = pygame.font.SysFont("dejavusans", 13)
         self.botao_fonte = pygame.font.SysFont("dejavusans", 19, bold=True)
         self.tecla_fonte = pygame.font.SysFont("dejavusans", 19, bold=True)
@@ -666,16 +666,18 @@ class Interface:
             "pausar": pygame.Rect(ESQUERDA_X, 332, ESQUERDA_LARGURA, 50),
             "reiniciar": pygame.Rect(ESQUERDA_X, 394, ESQUERDA_LARGURA, 50),
         }
-        # Controles em 4 linhas de mesma altura. Legendas ficam numa coluna
-        # exclusiva, a partir de x=204: nunca cruzam os botões.
+        # Teclas compactas e legendas em colunas separadas.
+        controles_x = ESQUERDA_X + 16
+        self.legendas_x = controles_x + 92
         self.teclas_interface = {
-            "esquerda": pygame.Rect(56, 523, 52, 40),
-            "direita": pygame.Rect(118, 523, 52, 40),
-            "baixo": pygame.Rect(56, 568, 52, 40),
-            "cima": pygame.Rect(56, 613, 52, 40),
-            "espaco": pygame.Rect(56, 658, 128, 40),
+            "esquerda": pygame.Rect(controles_x, 523, 36, 40),
+            "direita": pygame.Rect(controles_x + 44, 523, 36, 40),
+            "baixo": pygame.Rect(controles_x, 568, 36, 40),
+            "cima": pygame.Rect(controles_x, 613, 36, 40),
+            "espaco": pygame.Rect(controles_x, 658, 80, 40),
         }
-        self.caixa_hold = pygame.Rect(54, 119, 290, 118)
+        self.caixa_hold = pygame.Rect(ESQUERDA_X + 16, 119,
+                                     ESQUERDA_LARGURA - 32, 118)
         self.proximo_movimento: dict[int, float] = {}
         self.layout_checado = self.verificar_layout()
 
@@ -686,8 +688,10 @@ class Interface:
         assert all(painel_controles.contains(caixa) for caixa in caixas)
         assert all(not caixas[i].colliderect(caixas[j])
                    for i in range(len(caixas)) for j in range(i + 1, len(caixas)))
-        assert all(caixa.right <= 184 for caixa in caixas)
-        assert 204 + 142 <= ESQUERDA_X + ESQUERDA_LARGURA
+        assert all(caixa.right + 12 <= self.legendas_x for caixa in caixas)
+        for rotulo in ("Mover", "Descer", "Girar", "Queda rápida"):
+            assert self.legendas_x + self.normal.size(rotulo)[0] <= painel_controles.right - 12
+        assert CAMPO_Y + CAMPO_ALTURA + 40 < ALTURA
         # O tabuleiro deve ser mais largo que cada painel lateral.
         assert CAMPO_LARGURA > max(ESQUERDA_LARGURA, DIREITA_LARGURA)
         assert ESQUERDA_X + ESQUERDA_LARGURA < CAMPO_X
@@ -743,7 +747,7 @@ class Interface:
     def miniatura(self, tipo: str | None, area: pygame.Rect, tamanho: int = 27) -> None:
         if tipo is None:
             self.escrever("Nenhuma peça guardada", area.centerx, area.centery,
-                          self.normal, cor=TEXTO_SUAVE, centro=True)
+                          self.pequena, cor=TEXTO_SUAVE, centro=True)
             return
         coords = celulas_peca(tipo)
         xs, ys = [xy[0] for xy in coords], [xy[1] for xy in coords]
@@ -787,8 +791,9 @@ class Interface:
     def desenhar_lateral_esquerda(self, mouse: tuple[int, int] | None) -> None:
         area_hold = pygame.Rect(ESQUERDA_X, 74, ESQUERDA_LARGURA, 182)
         self.painel(area_hold)
-        self.escrever("HOLD", 55, 88, self.subtitulo)
-        self.escrever("C / SHIFT", 270, 97, self.pequena, cor=TEXTO_SUAVE)
+        self.escrever("HOLD", ESQUERDA_X + 16, 88, self.subtitulo)
+        self.escrever("C / SHIFT", ESQUERDA_X + ESQUERDA_LARGURA - 80, 97,
+                      self.pequena, cor=TEXTO_SUAVE)
         pygame.draw.rect(self.tela, PAINEL_INTERNO,
                          self.caixa_hold, border_radius=8)
         borda = CIANO if (mouse is not None and
@@ -801,8 +806,8 @@ class Interface:
 
         controles = pygame.Rect(ESQUERDA_X, 461, ESQUERDA_LARGURA, 281)
         self.painel(controles)
-        self.escrever("CONTROLES", 56, 476, self.subtitulo)
-        self.escrever("TECLADO / MOUSE", 222, 482, self.pequena,
+        self.escrever("CONTROLES", ESQUERDA_X + 16, 473, self.subtitulo)
+        self.escrever("TECLADO / MOUSE", ESQUERDA_X + 16, 500, self.pequena,
                       cor=TEXTO_SUAVE)
 
         simbolos = {"esquerda": "←", "direita": "→", "baixo": "↓",
@@ -820,9 +825,9 @@ class Interface:
         # Coluna de legendas totalmente separada da coluna de teclas.
         for rotulo, y in (("Mover", 543), ("Descer", 588),
                           ("Girar", 633), ("Queda rápida", 678)):
-            self.escrever(rotulo, 204, y, self.normal, meio_y=True)
+            self.escrever(rotulo, self.legendas_x, y, self.normal, meio_y=True)
 
-        self.escrever("C ou Shift = guardar peça", 56, 716,
+        self.escrever("C / Shift: guardar peça", ESQUERDA_X + 16, 716,
                       self.pequena, cor=TEXTO_SUAVE)
 
     def cartao_estatistica(self, titulo: str, valor: int, y: int,
@@ -851,9 +856,10 @@ class Interface:
         self.cartao_estatistica("PONTOS", self.jogo.pontos, 280, CIANO)
         self.cartao_estatistica("LINHAS", self.jogo.linhas_feitas, 426, VERDE)
         self.cartao_estatistica("NÍVEL", self.jogo.nivel, 572, AMARELO)
-        self.escrever(f"7 FORMAS DE PEÇAS  •  GRADE {COLUNAS} × {LINHAS}",
-                      DIREITA_X + 8, 729, self.pequena,
-                      cor=TEXTO_SUAVE)
+        self.escrever("7 FORMAS DE PEÇAS", DIREITA_X + DIREITA_LARGURA // 2,
+                      729, self.pequena, cor=TEXTO_SUAVE, centro=True)
+        self.escrever(f"GRADE {COLUNAS} × {LINHAS}", DIREITA_X + DIREITA_LARGURA // 2,
+                      751, self.pequena, cor=TEXTO_SUAVE, centro=True)
 
     def demo_tabuleiro(self) -> list[list[str | None]]:
         """Cenário inicial meramente ilustrativo; não entra na partida."""
@@ -916,7 +922,7 @@ class Interface:
                 "fim": ("FIM DE JOGO", "R para reiniciar"),
             }
             linha1, linha2 = mensagens[self.jogo.estado]
-            cartao = pygame.Rect(CAMPO_X + 14, CAMPO_Y + 252,
+            cartao = pygame.Rect(CAMPO_X + 14, CAMPO_Y + (CAMPO_ALTURA - 96) // 2,
                                  CAMPO_LARGURA - 28, 96)
             pygame.draw.rect(self.tela, PAINEL, cartao, border_radius=9)
             pygame.draw.rect(self.tela, CIANO if self.jogo.estado == "pronto"

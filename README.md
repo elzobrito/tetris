@@ -97,7 +97,7 @@ A partida termina quando uma nova peça não cabe na posição inicial ou quando
 
 ## Interface e áudio
 
-A interface usa uma superfície lógica de **1240 × 780 pixels**, com células de 30 pixels. A janela pode ser redimensionada; o desenho preserva a proporção, com faixas nas bordas quando necessário. A tela inicial apresenta um tabuleiro ilustrativo que não faz parte da partida.
+A interface usa uma superfície lógica de **1120 × 940 pixels**, com células de 40 pixels e painéis laterais compactos de 232 pixels de largura. A janela pode ser redimensionada; o desenho preserva a proporção, com faixas nas bordas quando necessário. A tela inicial apresenta um tabuleiro ilustrativo que não faz parte da partida.
 
 Os efeitos são gerados em memória. A trilha tem melodia, baixo, arpejo e bateria, com 16 compassos; começa em 128 BPM e acelera com o nível até 168 BPM. Música e efeitos têm controles independentes de volume. Ao pausar a partida, a trilha também é pausada.
 
